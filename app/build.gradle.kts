@@ -34,6 +34,7 @@ kotlin{
 
 dependencies {
     implementation(libs.books)
+    testImplementation(libs.junit.junit)
     val composeBom = platform("androidx.compose:compose-bom:2023.10.01")
     implementation(composeBom)
     implementation("androidx.compose.material3:material3")
