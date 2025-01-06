@@ -8,6 +8,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -32,6 +35,19 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+// Provide Custom Colors
+data class ExtendedColors(
+    val available: Color,
+    val unavailable: Color
+)
+
+val LocalExtendedColors = staticCompositionLocalOf {
+    ExtendedColors(
+        available = AvailableColor,
+        unavailable = UnavailableColor
+    )
+}
+
 @Composable
 fun BookLibraryTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -47,6 +63,19 @@ fun BookLibraryTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    val extendedColors = ExtendedColors(
+        available = AvailableColor,
+        unavailable = UnavailableColor
+    )
+
+    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
     }
 
     MaterialTheme(

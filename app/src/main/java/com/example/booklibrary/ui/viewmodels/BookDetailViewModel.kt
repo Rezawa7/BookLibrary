@@ -1,5 +1,8 @@
 package com.example.booklibrary.ui.viewmodels
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.booklibrary.data.models.*
@@ -8,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
@@ -24,6 +28,14 @@ class BookDetailViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _loanCreationStatus = MutableStateFlow<LoanCreationStatus?>(null)
+    val loanCreationStatus: StateFlow<LoanCreationStatus?> = _loanCreationStatus.asStateFlow()
+
+    sealed class LoanCreationStatus {
+        object Success : LoanCreationStatus()
+        data class Error(val message: String) : LoanCreationStatus()
+    }
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -43,7 +55,7 @@ class BookDetailViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 val bookWithLoan = repository.getBook(_id)
-                _selectedBook.value = bookWithLoan // Assuming BookWithLoan has a 'book' property
+                _selectedBook.value = bookWithLoan
                 println("Load book: $bookWithLoan")
             } catch (e: Exception) {
                 _error.value = "Failed to load book: ${e.message}"
@@ -57,7 +69,6 @@ class BookDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Log the book object
                 println("Saving book: $book")
 
                 if (book.id.isEmpty()) {
@@ -65,7 +76,7 @@ class BookDetailViewModel @Inject constructor(
                 } else {
                     repository.updateBook(book.id, book)
                 }
-                loadBooks()  // Refresh the list
+                loadBooks()
             } catch (e: Exception) {
                 _error.value = "Failed to save book: ${e.message}"
             } finally {
@@ -74,9 +85,69 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createLoanForBook(
+        bookId: String,
+        borrowerName: String,
+        borrowerEmail: String
+    ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val now = LocalDateTime.now()
+                val dueDate = now.plusDays(30) // Set due date to 30 days from now
 
+                val loanRequest = LoanRequest(
+                    bookId = bookId,
+                    borrowerName = borrowerName,
+                    borrowerEmail = borrowerEmail,
+                    borrowDate = now.toString(),
+                    dueDate = dueDate.toString(),
+                    status = "ACTIVE"
+                )
+
+                println("Complete loan request:")
+                println(loanRequest.toString())
+
+                val response = repository.createLoan(loanRequest)
+                println("Loan creation successful: $response")
+
+                loadBookById(bookId)
+                _loanCreationStatus.value = LoanCreationStatus.Success
+            } catch (e: Exception) {
+                println("Loan creation failed:")
+                println("Error message: ${e.message}")
+                println("Error cause: ${e.cause}")
+                e.printStackTrace()
+
+                _error.value = "Failed to create loan: ${e.message}"
+                _loanCreationStatus.value = LoanCreationStatus.Error(e.message ?: "Unknown error occurred")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun returnBook(loanId: String, bookId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.returnBook(loanId)
+                // Refresh the selected book to show updated loan status
+                loadBookById(bookId)
+            } catch (e: Exception) {
+                _error.value = "Failed to return book: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun clearLoanCreationStatus() {
+        _loanCreationStatus.value = null
     }
 }

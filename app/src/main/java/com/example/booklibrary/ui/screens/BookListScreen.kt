@@ -18,9 +18,7 @@ import com.example.booklibrary.data.models.Book
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
-
-
-
+import com.example.booklibrary.ui.theme.LocalExtendedColors
 
 
 @Composable
@@ -117,11 +115,22 @@ private fun BookItem(
     onBookClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    // Access the custom colors
+    val extendedColors = LocalExtendedColors.current
+
+    // Determine the background color based on the book's status
+    val backgroundColor = if (book.status.equals("Available", ignoreCase = true)) {
+        extendedColors.available.copy(alpha = 0.1f) // Light shade for available
+    } else {
+        extendedColors.unavailable.copy(alpha = 0.1f) // Light shade for unavailable
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable(onClick = onBookClick)
+            .clickable(onClick = onBookClick),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor) // Set the background color dynamically
     ) {
         Row(
             modifier = Modifier
@@ -146,5 +155,6 @@ private fun BookItem(
         }
     }
 }
+
 
 

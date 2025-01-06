@@ -1,7 +1,6 @@
 package com.example.booklibrary.data.models
 
 import com.google.gson.annotations.SerializedName
-import java.util.Date
 
 data class Loan(
     val _id: String,
@@ -9,7 +8,7 @@ data class Loan(
     val borrowerName: String,
     val borrowerEmail: String,
     val borrowDate: String,
-    val returnDate: String?,
+    val returnDate: String,
     val status: String
 )
 
@@ -27,3 +26,17 @@ data class BookWithLoan(
     val book: Book,
     val activeLoan: Loan?
 )
+
+data class LoanRequest(
+    val bookId: String,
+    val borrowerName: String,
+    val borrowerEmail: String,
+    val borrowDate: String,
+    val dueDate: String,
+    val status: String
+)
+
+data class ApiResponse(
+    val message: String
+)
+
