@@ -235,16 +235,12 @@ fun LoanHistoryCard(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Loan ID: ${loan.id}",
-                style = MaterialTheme.typography.titleSmall
+                text = "Borrowed Book: ${loan.bookName}",
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = "Borrower: ${loan.borrowerName}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Borrow Date: ${loan.borrowDate}",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyLarge
             )
             loan.returnDate?.let { returnDate ->
                 Text(
@@ -254,6 +250,10 @@ fun LoanHistoryCard(
             }
             Text(
                 text = "Status: ${loan.status}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Loan ID: ${loan.id}",
                 style = MaterialTheme.typography.bodySmall
             )
         }

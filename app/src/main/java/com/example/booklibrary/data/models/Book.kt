@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class Loan(
     @SerializedName("_id") val id: String = "", // Or ObjectId if you have a corresponding Kotlin type
     val bookId: String, // Or ObjectId if you have a corresponding Kotlin type
-    val bookName: String,
+    @SerializedName("book_name")val bookName: String,
     @SerializedName("borrower_name") val borrowerName: String,
     @SerializedName("borrower_email") val borrowerEmail: String,
     @SerializedName("borrow_date")val borrowDate: String, // Consider using Date/DateTime type
