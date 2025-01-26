@@ -17,7 +17,6 @@ class LibraryRepository @Inject constructor(
     suspend fun updateBook(id: String, book: Book): Book = api.updateBook(id, book)
     suspend fun deleteBook(id: String) = api.deleteBook(id)
     suspend fun getActiveLoans(): List<BookWithLoan> = api.getActiveLoans()
-    suspend fun getBookWithLoan(bookId: String): BookWithLoan = api.getBook(bookId)
     suspend fun getAllLoans(): List<Loan> = api.getAllLoans()
     suspend fun createLoan(loan: LoanRequest): Loan = api.createLoan(loan)
     suspend fun returnBook(loanId: String): ApiResponse = api.returnBook(loanId)

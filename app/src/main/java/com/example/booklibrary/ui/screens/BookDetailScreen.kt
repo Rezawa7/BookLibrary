@@ -39,10 +39,14 @@ fun BookDetailScreen(
     var publishYear by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
+    var loanName by remember { mutableStateOf("") }
+    var loanDate by remember { mutableStateOf("") }
+    var loanStatus by remember { mutableStateOf("") }
 
     LaunchedEffect(bookId) {
         if (bookId != null) {
             viewModel.loadBookById(bookId)
+
         }
     }
 
@@ -54,6 +58,10 @@ fun BookDetailScreen(
             publishYear = bookWithLoan.book.publishYear.toString()
             description = bookWithLoan.book.description.toString()
             status = bookWithLoan.book.status
+            loanStatus = bookWithLoan.active_loan?.status.toString()
+            loanName = bookWithLoan.active_loan?.borrowerName.toString()
+            loanDate = bookWithLoan.active_loan?.borrowDate.toString()
+
         }
     }
 
@@ -149,26 +157,38 @@ fun BookDetailScreen(
                                 text = "Book Status: $status",
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
 
-                            selectedBook?.activeLoan?.let { loan ->
-                                Text("Currently borrowed by: ${loan.borrowerName}")
-                                Text("Borrowed on: ${loan.borrowDate}")
-                                Button(
-                                    onClick = {
-                                        viewModel.returnBook(loan._id, bookId ?: "")
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("Return Book")
+                            // Conditional rendering based on book status and active loan
+                            when {
+                                // If book is available and no active loan, show Loan Book button
+                                status == "AVAILABLE" -> {
+                                    if (bookId != null) {
+                                        LoanBookButton(
+                                            bookId = bookId,
+                                            viewModel = viewModel,
+                                            bookName = title,
+                                            isEnabled = true
+                                        )
+                                    }
                                 }
-                            } ?: run {
-                                if (bookId != null) {  // Only show loan button for existing books
-                                    LoanBookButton(
-                                        bookId = bookId,
-                                        viewModel = viewModel,
-                                        isEnabled = status == "AVAILABLE"
+
+                                // If book has an active loan, show loan details and Return Book button
+                                selectedBook?.active_loan != null -> {
+                                    val loan = selectedBook!!.active_loan!!
+                                    Text(
+                                        text = "Loan Status: ${loanStatus}",
+                                        style = MaterialTheme.typography.titleMedium
                                     )
+                                    Text("Currently borrowed by: ${loanName}")
+                                    Text("Borrowed on: ${loanDate}")
+                                    Button(
+                                        onClick = {
+                                            viewModel.returnBook(loan.id, bookId ?: "")
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("Return Book")
+                                    }
                                 }
                             }
                         }
@@ -216,6 +236,7 @@ fun BookDetailScreen(
 @Composable
 fun LoanBookButton(
     bookId: String,
+    bookName:String,
     viewModel: BookDetailViewModel,
     isEnabled: Boolean = true
 ) {
@@ -236,6 +257,7 @@ fun LoanBookButton(
                 viewModel.createLoanForBook(
                     bookId = bookId,
                     borrowerName = borrowerName,
+                    bookName = bookName,
                     borrowerEmail = borrowerEmail
                 )
                 showDialog = false

@@ -88,6 +88,7 @@ class BookDetailViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.O)
     fun createLoanForBook(
         bookId: String,
+        bookName:String,
         borrowerName: String,
         borrowerEmail: String
     ) {
@@ -98,11 +99,12 @@ class BookDetailViewModel @Inject constructor(
                 val dueDate = now.plusDays(30) // Set due date to 30 days from now
 
                 val loanRequest = LoanRequest(
-                    bookId = bookId,
-                    borrowerName = borrowerName,
-                    borrowerEmail = borrowerEmail,
-                    borrowDate = now.toString(),
-                    dueDate = dueDate.toString(),
+                    book_id = bookId,
+                    book_name = bookName,
+                    borrower_name = borrowerName,
+                    borrower_email = borrowerEmail,
+                    borrow_date = now.toString(),
+                    return_date = dueDate.toString(),
                     status = "ACTIVE"
                 )
 

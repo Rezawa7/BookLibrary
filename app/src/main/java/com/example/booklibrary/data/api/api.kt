@@ -20,7 +20,7 @@ interface LibraryApi {
     @GET("api/loans/active")
     suspend fun getActiveLoans(): List<BookWithLoan>
 
-    @POST("api/loans")
+    @POST("/api/loans")
     suspend fun createLoan(@Body loan: LoanRequest): Loan
 
     @PUT("api/loans/{loanId}/return")

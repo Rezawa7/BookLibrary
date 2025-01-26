@@ -114,10 +114,11 @@ fun LoansScreen(
         CreateLoanDialog(
             book = selectedBookForLoan!!,
             onDismiss = { showLoanDialog = false },
-            onCreateLoan = { name, email ->
+            onCreateLoan = { name, email, bookName ->
                 scope.launch {
                     viewModel.createLoan(
                         selectedBookForLoan!!.id,
+                        bookName,
                         name,
                         email
                     )
@@ -174,13 +175,17 @@ fun ActiveLoanCard(
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
-            bookWithLoan.activeLoan?.let { loan ->
+            bookWithLoan.active_loan?.let { loan ->
                 Text(
-                    text = "Borrowed by: ${loan.borrowerName}",
+                    text = "Borrowed by: ${bookWithLoan.active_loan.borrowerName}",
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "Borrow Date: ${loan.borrowDate}",
+                    text = "Borrow Date: ${bookWithLoan.active_loan.borrowDate}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Status: ${bookWithLoan.active_loan.status}",
                     style = MaterialTheme.typography.bodySmall
                 )
                 Row(
@@ -188,7 +193,7 @@ fun ActiveLoanCard(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Button(
-                        onClick = { onReturnBook(loan._id) }
+                        onClick = { onReturnBook(loan.id) }
                     ) {
                         Text("Return Book")
                     }
@@ -230,7 +235,7 @@ fun LoanHistoryCard(
                 .fillMaxWidth()
         ) {
             Text(
-                text = "Loan ID: ${loan._id}",
+                text = "Loan ID: ${loan.id}",
                 style = MaterialTheme.typography.titleSmall
             )
             Text(
@@ -259,10 +264,11 @@ fun LoanHistoryCard(
 fun CreateLoanDialog(
     book: Book,
     onDismiss: () -> Unit,
-    onCreateLoan: (name: String, email: String) -> Unit
+    onCreateLoan: (name: String, email: String, bookName:String) -> Unit
 ) {
     var borrowerName by remember { mutableStateOf("") }
     var borrowerEmail by remember { mutableStateOf("") }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -294,7 +300,7 @@ fun CreateLoanDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onCreateLoan(borrowerName, borrowerEmail)
+                    onCreateLoan(borrowerName, borrowerEmail, book.title)
                 },
                 enabled = borrowerName.isNotBlank() && borrowerEmail.isNotBlank()
             ) {

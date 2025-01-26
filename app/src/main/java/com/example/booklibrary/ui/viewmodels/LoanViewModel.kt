@@ -35,6 +35,7 @@ class LoanViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+
     fun loadActiveLoans() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -53,6 +54,7 @@ class LoanViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 _allLoans.value = repository.getAllLoans()
+                println("Loaded active loans: $_allLoans")
             } catch (e: Exception) {
                 _error.value = "Failed to load loan history: ${e.message}"
             } finally {
@@ -61,30 +63,19 @@ class LoanViewModel @Inject constructor(
         }
     }
 
-    fun loadBookWithLoan(bookId: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                _selectedBookWithLoan.value = repository.getBookWithLoan(bookId)
-            } catch (e: Exception) {
-                _error.value = "Failed to load book details: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createLoan(bookId: String, borrowerName: String, borrowerEmail: String) {
+    fun createLoan(bookId: String, bookName:String ,borrowerName: String, borrowerEmail: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val loanRequest = LoanRequest(
-                    bookId = bookId,
-                    borrowerName = borrowerName,
-                    borrowerEmail = borrowerEmail,
-                    borrowDate = LocalDateTime.now().toString(),
-                    dueDate = LocalDateTime.now().plusDays(30).toString(),
+                    book_id = bookId,
+                    book_name = bookName,
+                    borrower_name = borrowerName,
+                    borrower_email = borrowerEmail,
+                    borrow_date = LocalDateTime.now().toString(),
+                    return_date = LocalDateTime.now().plusDays(30).toString(),
                     status = "ACTIVE"
                 )
                 repository.createLoan(loanRequest)
